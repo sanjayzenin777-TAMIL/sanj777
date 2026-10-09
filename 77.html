@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050b1b">
+<title>DS TaskHub — Study, Build, Create</title>
+<style>
+:root {
+  --bg:#050b1b; --panel:#0b1730; --panel2:#102348;
+  --line:#263f70; --text:#eef3ff; --muted:#9aafd2;
+  --blue:#4f7cff; --purple:#a14fff; --green:#40e6b3;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;color:var(--text);font-family:Inter,system-ui,sans-serif;
+  background:radial-gradient(ellipse at 15% 0%,#17295c,transparent 40%),
+  radial-gradient(ellipse at 90% 30%,#271044,transparent 32%),var(--bg);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #92adff;outline-offset:2px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 4%;border-bottom:1px solid var(--line);background:#050b1be8;position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo,.orb{display:grid;place-items:center;background:linear-gradient(135deg,#2364ff,#aa3fff);box-shadow:0 0 22px #6854ff44}
+.logo{width:44px;height:44px;border-radius:14px;font-size:24px}
+.brand h1{font-size:20px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.pill{border:1px solid #36518b;border-radius:30px;padding:9px 13px;color:#cad8ff;font-size:11px}
+.layout{max-width:1550px;margin:auto;padding:20px;display:grid;grid-template-columns:205px minmax(0,1fr);gap:18px}
+.sidebar,.panel,.metric{border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#0d1b38f5,#07132bf5)}
+.sidebar{padding:12px;display:flex;flex-direction:column;gap:7px;min-height:650px}
+.nav{width:100%;text-align:left;padding:12px;border:1px solid transparent;border-radius:11px;background:transparent;color:#b7c9ec}
+.nav:hover,.nav.active{background:linear-gradient(110deg,#243d9a,#202052);border-color:#435fbc;color:white}
+.sidebar-note{margin-top:auto;padding:14px;border-radius:12px;background:#0c1b38;border:1px solid #2b426e;font-size:12px;color:var(--muted)}
+.sidebar-note strong{color:#bac7ff}
+main{min-width:0}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 20px}
+h2{font-size:clamp(22px,3vw,30px);margin:0}h3{font-size:17px;margin:0 0 7px}
+.sub,.muted{font-size:12px;color:var(--muted)}.sub{margin:5px 0 16px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.metric{padding:17px}.metric span{font-size:12px;color:var(--muted)}.metric strong{display:block;font-size:29px;margin-top:7px}
+.metric:nth-child(1){border-color:#3c5cc0}.metric:nth-child(2){border-color:#936a3d}.metric:nth-child(3){border-color:#167f6c}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:15px;align-items:start}
+.panel{padding:17px;min-width:0;margin-bottom:16px}
+label{display:block;font-size:12px;color:#c8d6f1;margin-bottom:6px}
+.field{margin-bottom:13px}
+input,select,textarea{width:100%;color:var(--text);background:#07152d;border:1px solid #365180;border-radius:10px;padding:11px}
+textarea{resize:vertical;min-height:76px}
+input::placeholder,textarea::placeholder{color:#748bb2}
+select option{background:#07152d}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{padding:10px 13px;border-radius:10px;border:1px solid #38568f;background:#0d2042;color:white}
+.btn:hover{filter:brightness(1.18)}
+.primary{background:linear-gradient(120deg,#2464ff,#9348f8);border:0}
+.btn:disabled{opacity:.55;cursor:wait}
+.tools{display:grid;gap:8px;margin:12px 0}
+.task-list{display:flex;flex-direction:column;gap:9px}
+.task{padding:12px;border:1px solid #294570;border-radius:12px;background:linear-gradient(120deg,#0d2040,#09162e)}
+.task-top{display:flex;align-items:flex-start;gap:8px}
+.task-title{font-weight:650;flex:1;overflow-wrap:anywhere}
+.task.done .task-title{text-decoration:line-through;color:#8aa0c3}
+.tags,.actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font-size:10px;padding:5px 8px;border-radius:20px;border:1px solid #36558a;color:#c4d4f5}
+.tag.pending{color:#ffc477;border-color:#9d6938}.tag.complete{color:#61edc1;border-color:#208e73}
+.task-desc{font-size:12px;color:#a7b9d8;white-space:pre-wrap;overflow-wrap:anywhere}
+.small{font-size:11px;padding:7px 9px}
+.empty{padding:24px 8px;text-align:center;color:var(--muted);font-size:13px}
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.member{padding:11px 4px;text-align:center;border:1px solid #294570;border-radius:11px;background:#0a1934;font-size:11px;overflow-wrap:anywhere}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;margin:0 auto 7px;background:linear-gradient(135deg,#2764e8,#aa4adf)}
+.orb{width:42px;height:42px;border-radius:13px;font-size:22px;flex-shrink:0}
+.ai-head{display:flex;align-items:center;gap:11px}.ai-head h3{margin:0}.online{margin-left:auto;color:var(--green);font-size:10px}
+.quick{display:flex;flex-wrap:wrap;gap:7px;margin:13px 0}
+.messages{min-height:120px;max-height:330px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:12px 0}
+.bubble{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;font-size:13px;padding:11px 13px;border-radius:13px;max-width:94%}
+.bot{align-self:flex-start;background:#102448;border:1px solid #294878}.user{align-self:flex-end;background:linear-gradient(120deg,#2856cf,#7542bd)}
+.chat-form{display:flex;gap:8px;align-items:end}.chat-form textarea{min-height:44px;max-height:130px;flex:1}.chat-form button{height:44px;min-width:45px}
+.hint{font-size:10px;color:var(--muted);margin:10px 0 0}
+.music-hero{display:flex;gap:14px;align-items:center;padding:17px;border:1px solid #3d347b;border-radius:14px;background:linear-gradient(110deg,#211a4a,#102548)}
+.music-disc{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-size:28px;background:conic-gradient(#8056ff,#27a8ff,#ed58bb,#8056ff);box-shadow:0 0 25px #8b54ff55}
+.music-disc span{background:#111737;border-radius:50%;width:40px;height:40px;display:grid;place-items:center}
+footer{text-align:center;padding:20px;color:#7188b5;font-size:11px}
+.hidden{display:none!important}
+@media(max-width:1000px){.layout{grid-template-columns:1fr;padding:13px}.sidebar{min-height:auto;flex-direction:row;flex-wrap:wrap}.nav{width:auto;flex:1}.sidebar-note{display:none}}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.row2{grid-template-columns:1fr}.metrics{gap:7px}.metric{padding:12px}.metric strong{font-size:23px}.panel{padding:13px}}
+@media(max-width:430px){.metrics{grid-template-columns:1fr}.pill{display:none}.brand h1{font-size:17px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="logo">✦</div><div><h1>DS TaskHub</h1><p>AI & Data Science Workspace</p></div></div>
+  <span class="pill">◉ STUDY WORKSPACE</span>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+  <button class="nav active" data-target="dashboard">⌂ Dashboard</button>
+  <button class="nav" data-target="task-editor">＋ Add Task</button>
+  <button class="nav" data-target="task-board">▤ My Tasks</button>
+  <button class="nav" data-target="team-panel">♧ Team</button>
+  <button class="nav" data-target="ai-panel">✧ TaskHub AI</button>
+  <button class="nav" data-target="music-panel">♫ YouTube Music</button>
+  <div class="sidebar-note"><strong>Learn. Build. Grow.</strong><p>Small steps today. Smarter projects tomorrow.</p></div>
+</aside>
+
+<main>
+<section id="dashboard">
+  <div class="hero"><div><h2>Your team's command center</h2><p class="sub">Organize classwork and learn together.</p></div><button class="btn primary" id="new-task">＋ New Task</button></div>
+
+  <div class="metrics">
+    <div class="metric"><span>Total Tasks</span><strong id="total-count">0</strong></div>
+    <div class="metric"><span>Pending</span><strong id="pending-count">0</strong></div>
+    <div class="metric"><span>Completed</span><strong id="done-count">0</strong></div>
+  </div>
+
+  <div class="grid">
+  <section class="panel" id="task-editor">
+    <h3 id="form-title">＋ Add New Task</h3><p class="sub">Create homework or classwork for your team.</p>
+    <form id="task-form">
+      <input id="edit-id" type="hidden">
+      <div class="field"><label for="task-name">Task title *</label><input id="task-name" maxlength="120" required placeholder="e.g. Complete Maths Assignment"></div>
+      <div class="row2">
+        <div class="field"><label for="task-category">Category</label><select id="task-category"><option>Homework</option><option>Class Task</option><option>Project</option><option>Exam Preparation</option></select></div>
+        <div class="field"><label for="task-subject">Subject</label><select id="task-subject"></select></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="task-member">Assigned to</label><select id="task-member"></select></div>
+        <div class="field"><label for="task-due">Due date</label><input id="task-due" type="date"></div>
+      </div>
+      <div class="field"><label for="task-description">Instructions</label><textarea id="task-description" maxlength="2000" placeholder="Add notes or assignment details"></textarea></div>
+      <div class="field"><label for="task-file">Attachment (optional, max 250 KB)</label><input id="task-file" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt"></div>
+      <button class="btn primary" id="save-task" type="submit">Add Task →</button>
+      <button class="btn" type="button" id="reset-task">Reset</button>
+    </form>
+  </section>
+
+  <section class="panel" id="task-board">
+    <h3>▤ Task Board</h3><p class="sub">Search and filter your tasks.</p>
+    <div class="tools">
+      <input id="search-task" placeholder="⌕ Search tasks">
+      <select id="filter-subject"><option value="">All subjects</option></select>
+      <select id="filter-member"><option value="">All members</option></select>
+      <select id="filter-category"><option value="">All categories</option><option>Homework</option><option>Class Task</option><option>Project</option><option>Exam Preparation</option></select>
+      <select id="filter-status"><option value="">All statuses</option><option value="pending">Pending</option><option value="done">Completed</option></select>
+      <button class="btn" id="clear-filters">Clear filters</button>
+      <button class="btn" id="export-csv">Export CSV</button>
+    </div>
+    <div class="task-list" id="task-list"></div>
+  </section>
+  </div>
+
+  <section class="panel" id="team-panel">
+    <h3>♧ Team Members</h3><p class="sub">Customize the six member names on this browser.</p>
+    <div class="team-grid" id="team-grid"></div>
+    <div class="field" style="margin-top:14px"><label for="team-names">Six names, one per line</label><textarea id="team-names" rows="6"></textarea></div>
+    <button class="btn primary" id="save-team">Save team names</button>
+  </section>
+
+  <section class="panel" id="ai-panel">
+    <div class="ai-head"><div class="orb">✧</div><div><h3>TaskHub AI</h3><p class="sub">Your AI study companion</p></div><span class="online">● READY</span></div>
+    <div class="quick">
+      <button class="btn" data-prompt="Explain Python variables with examples.">Python basics</button>
+      <button class="btn" data-prompt="Explain extrinsic semiconductors simply.">Physics help</button>
+      <button class="btn" data-prompt="Give me a beginner C programming exercise.">C practice</button>
+      <button class="btn" data-prompt="Explain AI versus machine learning versus data science.">AI & DS</button>
+    </div>
+    <div id="ai-messages" class="messages" aria-live="polite"><div class="bubble bot">Hi! I'm TaskHub AI. Ask me about coding, homework, maths or data science.</div></div>
+    <form id="ai-form" class="chat-form"><textarea id="ai-input" rows="2" maxlength="4000" required placeholder="Message TaskHub AI..."></textarea><button class="btn primary" id="ai-send" type="submit" aria-label="Send">➤</button></form>
+    <p class="hint">AI can make mistakes. Verify important answers. Do not share passwords or private information.</p>
+  </section>
+
+  <section class="panel" id="music-panel">
+    <div class="music-hero"><div class="music-disc"><span>♫</span></div><div><h3>TaskHub Music</h3><p class="sub" style="margin-bottom:0">Your study soundtrack. Search music and open it on YouTube Music.</p></div></div>
+    <div class="row2" style="margin-top:16px">
+      <div class="field"><label for="music-search">Search YouTube Music</label><input id="music-search" placeholder="Lo-fi, Tamil songs, coding music..."></div>
+      <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:13px"><button class="btn primary" id="music-search-btn" type="button">Search ↗️</button><button class="btn" id="music-open-btn" type="button">Open Music</button></div>
+    </div>
+    <h3>Focus presets</h3>
+    <p class="sub">Choose a soundtrack for your study session.</p>
+    <div class="quick">
+      <button class="btn music-preset" data-query="lofi hip hop study music">☁ Lo-fi Study</button>
+      <button class="btn music-preset" data-query="ambient deep focus music">◉ Deep Focus</button>
+      <button class="btn music-preset" data-query="instrumental coding music">⌘ Coding Mode</button>
+      <button class="btn music-preset" data-query="relaxing piano study music">♬ Piano</button>
+      <button class="btn music-preset" data-query="Tamil melody songs">♫ Tamil Melody</button>
+    </div>
+    <p class="hint">Opens YouTube Music in a new tab. Playback and availability depend on the selected content and your account.</p>
+  </section>
+</section>
+</main>
+</div>
+<footer>DS TaskHub · Learn • Build • Grow</footer>
+
+<script>
+/* Set this to the actual URL of your deployed Cloudflare Worker. */
+const AI_WORKER_URL = "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE";
+
+/* Customize these seven subjects. */
+const SUBJECTS = ["Subject 1","Subject 2","Subject 3","Subject 4","Subject 5","Subject 6","Subject 7"];
+const DEFAULT_TEAM = ["Member 1","Member 2","Member 3","Member 4","Member 5","Member 6"];
+const TASK_KEY = "dsTaskHubTasks_v4";
+const TEAM_KEY = "dsTaskHubTeam_v4";
+let tasks = readJSON(TASK_KEY, []);
+let team = readJSON(TEAM_KEY, DEFAULT_TEAM);
+let selectedFile = null;
+
+function readJSON(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+  catch { return fallback; }
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+function storeTasks() {
+  try { localStorage.setItem(TASK_KEY, JSON.stringify(tasks)); return true; }
+  catch { alert("Browser storage is full. Remove some attachments or old tasks."); return false; }
+}
+function fillSelect(id, values, label) {
+  const el = document.getElementById(id), old = el.value;
+  el.replaceChildren();
+  if (label !== null) {
+    const o = document.createElement("option"); o.value = ""; o.textContent = label; el.append(o);
+  }
+  values.forEach(value => {
+    const o = document.createElement("option"); o.value = value; o.textContent = value; el.append(o);
+  });
+  if ([...el.options].some(o => o.value === old)) el.value = old;
+}
+function setupSelects() {
+  fillSelect("task-subject", SUBJECTS, null);
+  fillSelect("filter-subject", SUBJECTS, "All subjects");
+  fillSelect("task-member", team, null);
+  fillSelect("filter-member", team, "All members");
+}
+function renderTeam() {
+  document.getElementById("team-grid").innerHTML = team.map(name =>
+    `<div class="member"><div class="avatar">${esc(name.charAt(0).toUpperCase() || "?")}</div>${esc(name)}</div>`
+  ).join("");
+  document.getElementById("team-names").value = team.join("\n");
+}
+function renderTasks() {
+  const q = document.getElementById("search-task").value.trim().toLowerCase();
+  const subject = document.getElementById("filter-subject").value;
+  const member = document.getElementById("filter-member").value;
+  const category = document.getElementById("filter-category").value;
+  const status = document.getElementById("filter-status").value;
+  const filtered = tasks.filter(t =>
+    (!q || (t.title+" "+t.description).toLowerCase().includes(q)) &&
+    (!subject || t.subject === subject) && (!member || t.member === member) &&
+    (!category || t.category === category) &&
+    (!status || (status === "done" ? t.done : !t.done))
+  );
+  document.getElementById("total-count").textContent = tasks.length;
+  document.getElementById("pending-count").textContent = tasks.filter(t => !t.done).length;
+  document.getElementById("done-count").textContent = tasks.filter(t => t.done).length;
+  const list = document.getElementById("task-list");
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">No tasks found. Add a task or change your filters.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(t => `
+    <article class="task ${t.done ? "done" : ""}">
+      <div class="task-top"><div class="task-title">${esc(t.title)}</div><span class="tag ${t.done ? "complete" : "pending"}">${t.done ? "Completed" : "Pending"}</span></div>
+      <div class="tags"><span class="tag">${esc(t.category)}</span><span class="tag">${esc(t.subject)}</span><span class="tag">♙ ${esc(t.member)}</span>${t.due ? `<span class="tag">Due: ${esc(t.due)}</span>` : ""}</div>
+      ${t.description ? `<p class="task-desc">${esc(t.description)}</p>` : ""}
+      ${t.fileData ? `<p class="hint"><a style="color:#adcaff" download="${esc(t.fileName)}" href="${t.fileData}">↳ ${esc(t.fileName)}</a></p>` : ""}
+      <div class="actions"><button class="btn small" data-action="toggle" data-id="${esc(t.id)}">${t.done ? "Reopen" : "Complete"}</button><button class="btn small" data-action="edit" data-id="${esc(t.id)}">Edit</button><button class="btn small" data-action="delete" data-id="${esc(t.id)}">Delete</button></div>
+    </article>`).join("");
+}
+function resetTaskForm() {
+  document.getElementById("task-form").reset();
+  document.getElementById("edit-id").value = "";
+  document.getElementById("form-title").textContent = "＋ Add New Task";
+  document.getElementById("save-task").textContent = "Add Task →";
+  selectedFile = null;
+}
+document.getElementById("task-file").addEventListener("change", async e => {
+  const file = e.target.files[0]; selectedFile = null;
+  if (!file) return;
+  if (file.size > 250 * 1024) {
+    alert("Please choose a file smaller than 250 KB for this browser-only version.");
+    e.target.value = ""; return;
+  }
+  selectedFile = {fileName:file.name,fileData:await new Promise((resolve,reject)=>{
+    const reader = new FileReader(); reader.onload=()=>resolve(reader.result); reader.onerror=reject; reader.readAsDataURL(file);
+  })};
+});
+document.getElementById("task-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const id = document.getElementById("edit-id").value;
+  const old = tasks.find(t => t.id === id);
+  const task = {
+    id:id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+    title:document.getElementById("task-name").value.trim(),
+    category:document.getElementById("task-category").value,
+    subject:document.getElementById("task-subject").value,
+    member:document.getElementById("task-member").value,
+    due:document.getElementById("task-due").value,
+    description:document.getElementById("task-description").value.trim(),
+    done:old ? old.done : false,
+    fileName:selectedFile ? selectedFile.fileName : (old?.fileName || ""),
+    fileData:selectedFile ? selectedFile.fileData : (old?.fileData || "")
+  };
+  if (!task.title) return;
+  if (id) tasks = tasks.map(t => t.id === id ? task : t);
+  else tasks.unshift(task);
+  if (storeTasks()) { resetTaskForm(); renderTasks(); }
+});
+document.getElementById("reset-task").addEventListener("click", resetTaskForm);
+document.getElementById("task-list").addEventListener("click", e => {
+  const b = e.target.closest("button[data-action]"); if (!b) return;
+  const task = tasks.find(t => t.id === b.dataset.id); if (!task) return;
+  if (b.dataset.action === "toggle") task.done = !task.done;
+  if (b.dataset.action === "delete") {
+    if (!confirm("Delete this task?")) return;
+    tasks = tasks.filter(t => t.id !== task.id);
+  }
+  if (b.dataset.action === "edit") {
+    document.getElementById("edit-id").value = task.id;
+    document.getElementById("task-name").value = task.title;
+    document.getElementById("task-category").value = task.category;
+    document.getElementById("task-subject").value = task.subject;
+    document.getElementById("task-member").value = task.member;
+    document.getElementById("task-due").value = task.due;
+    document.getElementById("task-description").value = task.description;
+    selectedFile = null;
+    document.getElementById("task-file").value = "";
+    document.getElementById("form-title").textContent = "✎ Edit Task";
+    document.getElementById("save-task").textContent = "Save Changes";
+    document.getElementById("task-editor").scrollIntoView({behavior:"smooth"});
+    return;
+  }
+  if (storeTasks()) renderTasks();
+});
+["search-task","filter-subject","filter-member","filter-category","filter-status"].forEach(id =>
+  document.getElementById(id).addEventListener("input", renderTasks)
+);
+document.getElementById("clear-filters").addEventListener("click", () => {
+  ["search-task","filter-subject","filter-member","filter-category","filter-status"].forEach(id => document.getElementById(id).value = "");
+  renderTasks();
+});
+document.getElementById("export-csv").addEventListener("click", () => {
+  const quote = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
+  const rows = [["Title","Category","Subject","Member","Due","Description","Completed"],...tasks.map(t=>[t.title,t.category,t.subject,t.member,t.due,t.description,t.done?"Yes":"No"])];
+  const url = URL.createObjectURL(new Blob(["\uFEFF"+rows.map(r=>r.map(quote).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download="ds-taskhub-tasks.csv";a.click();URL.revokeObjectURL(url);
+});
+document.getElementById("save-team").addEventListener("click", () => {
+  const names=document.getElementById("team-names").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  if(names.length!==6){alert("Enter exactly six names, one per line.");return;}
+  team=names;localStorage.setItem(TEAM_KEY,JSON.stringify(team));setupSelects();renderTeam();renderTasks();alert("Team names saved in this browser.");
+});
+document.querySelectorAll(".nav").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".nav").forEach(n=>n.classList.remove("active"));b.classList.add("active");
+  document.getElementById(b.dataset.target)?.scrollIntoView({behavior:"smooth",block:"start"});
+}));
+document.getElementById("new-task").addEventListener("click",()=>document.getElementById("task-editor").scrollIntoView({behavior:"smooth"}));
+
+/* AI assistant */
+const aiForm=document.getElementById("ai-form"), aiInput=document.getElementById("ai-input");
+const aiMessages=document.getElementById("ai-messages"), aiSend=document.getElementById("ai-send");
+function addMessage(text,role){
+  const b=document.createElement("div");b.className="bubble "+(role==="user"?"user":"bot");b.textContent=text;aiMessages.append(b);aiMessages.scrollTop=aiMessages.scrollHeight;return b;
+}
+document.querySelectorAll("[data-prompt]").forEach(b=>b.addEventListener("click",()=>{aiInput.value=b.dataset.prompt;aiForm.requestSubmit();}));
+aiForm.addEventListener("submit",async e=>{
+  e.preventDefault();const message=aiInput.value.trim();if(!message||aiSend.disabled)return;
+  if(AI_WORKER_URL.includes("PASTE_YOUR")){addMessage("Setup needed: add your deployed Cloudflare Worker URL to AI_WORKER_URL in index.html.","bot");return;}
+  addMessage(message,"user");aiInput.value="";aiSend.disabled=true;const pending=addMessage("Thinking…","bot");
+  try{
+    const response=await fetch(AI_WORKER_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||"AI request failed");
+    pending.textContent=data.answer||"No answer received. Try again.";
+  }catch(error){pending.textContent="Couldn't connect to the AI. Check the Worker URL, deployment, API access, and browser console.";console.error(error);}
+  finally{aiSend.disabled=false;aiInput.focus();aiMessages.scrollTop=aiMessages.scrollHeight;}
+});
+
+/* YouTube Music search */
+const musicSearch=document.getElementById("music-search");
+function openMusicSearch(query){
+  const q=query.trim();
+  if(!q){musicSearch.focus();return;}
+  window.open("https://music.youtube.com/search?q="+encodeURIComponent(q),"_blank","noopener,noreferrer");
+}
+document.getElementById("music-search-btn").addEventListener("click",()=>openMusicSearch(musicSearch.value));
+document.getElementById("music-open-btn").addEventListener("click",()=>window.open("https://music.youtube.com/","_blank","noopener,noreferrer"));
+musicSearch.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();openMusicSearch(musicSearch.value);}});
+document.querySelectorAll(".music-preset").forEach(b=>b.addEventListener("click",()=>openMusicSearch(b.dataset.query)));
+
+/* Initial page setup */
+setupSelects();renderTeam();renderTasks();
+</script>
+</body>
+</html>
